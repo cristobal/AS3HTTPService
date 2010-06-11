@@ -219,6 +219,36 @@ package com.net.http
 			urlRequest.url = value; // restore the url in case cache was set to false.
 		}
 		
+		/**
+		 * To curl string
+		 * 
+		 * @parameters
+		 * 
+		 * @return
+		 * 	Returns an url compatible for curl execution from commandline.
+		 */ 
+		public function toCurlString(parameters:Object=null, cache:Boolean=true):String {
+			var urlVariables:URLVariables = new URLVariables();
+			var args:Array = ["curl -d"];
+			if(parameters){
+				for(var property:String in parameters){
+					urlVariables[property] = parameters[property];
+				}
+			}
+			var urlQuery:String = urlVariables.toString();
+			if(!(!urlQuery || urlQuery == "")){
+				args.push("\"" + urlQuery + "\"");
+			}
+			
+			var uri:String = urlRequest.url;
+			if(!cache){
+				uri += (queryRe.test(uri) ? "&" : "?") + "time=" + Math.round(new Date().getTime()).toString();
+			}
+			
+			args.push(uri);
+			return args.join(" ");
+		}
+		
 		/* @end */
 		
 		

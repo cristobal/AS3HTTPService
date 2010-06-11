@@ -1,0 +1,4 @@
+AS3 HTTPService
+Description:
+	Mimics the mx.rpc.http.HTTPService class for AS3 Applications.
+	By using the flash.net.URLLoader & flash.net.URLRequest classes.
