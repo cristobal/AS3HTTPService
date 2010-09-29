@@ -1,4 +1,4 @@
-package com.net.http
+package	com.net.http
 {
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -15,6 +15,7 @@ package com.net.http
 	import flash.net.URLRequestHeader;
 	import flash.net.URLRequestMethod;
 	import flash.net.URLVariables;
+	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	
 	import com.net.rpc.Fault;
@@ -27,7 +28,7 @@ package com.net.http
 	 * Emulates the HTTPService class used in the flex framework for pure as3 applications.
 	 *
 	 * @author		Cristobal Dabed
-	 * @version		0.2
+	 * @version		0.3
 	 */
 	public final class HTTPService extends EventDispatcher
 	{
@@ -43,8 +44,11 @@ package com.net.http
 		public static const RESULT_FORMAT_TEXT:String = URLLoaderDataFormat.TEXT;
 		
 		public static const REQUEST_TIMEOUT_INTERVAL:int = 180;
-		public static const REQUEST_TIMEOUT_INTERVAL_MIN:int = 30;
+		public static const REQUEST_TIMEOUT_INTERVAL_MIN:int = 15;
 		public static const REQUEST_TIMEOUT_INTERVAL_MAX:int = 240;
+		
+		// public static const 
+		public static const CONTENT_TYPE_OCTET_STREAM:String = "application/octet-stream";
 		
 		/* Variables */
 		private var _internalResultFormat:String = RESULT_FORMAT_XML;	// xml|text
@@ -53,8 +57,8 @@ package com.net.http
 		private var _executing:Boolean = false;
 		private var timeout:Boolean = false;
 		
-		private var urlLoader:URLLoader = new URLLoader();
-		private var urlRequest:URLRequest = new URLRequest();
+		private var urlLoader:URLLoader 	= new URLLoader();
+		private var urlRequest:URLRequest 	= new URLRequest();
 		private var timer:Timer = new Timer(_requestTimeout, 1);
 		
 		private static var queryRe:RegExp = /\?/;
@@ -79,9 +83,23 @@ package com.net.http
 			
 			// urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHTTPStatusEvent); 	// Not Implemented
 			// urlLoader.addEventListener(ProgressEvent.PROGRESS, handleProgressEvent); 		// Not Implemented
-				
+			
 			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, handleSecurityError);
 			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
+		}
+		
+		/**
+		 * Get the contentType
+		 */
+		public function get contentType():String {
+			return urlRequest.contentType;
+		}
+		
+		/**
+		 * @private
+		 */ 
+		public function set contentType(value:String):void {
+			urlRequest.contentType = value;
 		}
 		
 		/**
@@ -117,7 +135,7 @@ package com.net.http
 			}
 			_internalResultFormat = value;
 		}
-
+		
 		/**
 		 * @read method value.
 		 */
@@ -131,7 +149,7 @@ package com.net.http
 		public function set url(value:String):void {
 			urlRequest.url = value;
 		}
-
+		
 		/**
 		 * @read method value.
 		 */
@@ -198,12 +216,12 @@ package com.net.http
 			
 			var value:String = urlRequest.url; // stash the url
 			/*
-			 * 1. Set urlRequest.data to default empty {}, 
-			 * 2. If parameters is set, then set the urlRequest.data = parameters.
-			 * 3. If do not cache then add a timestamp value.
-			 * 4. Send(load) the request.
-			 * 
-			 */
+			* 1. Set urlRequest.data to default empty {}, 
+			* 2. If parameters is set, then set the urlRequest.data = parameters.
+			* 3. If do not cache then add a timestamp value.
+			* 4. Send(load) the request.
+			* 
+			*/
 			urlRequest.data = null;
 			if(parameters){
 				urlRequest.data = new URLVariables();
@@ -217,6 +235,92 @@ package com.net.http
 			
 			urlLoader.load(urlRequest);
 			urlRequest.url = value; // restore the url in case cache was set to false.
+		}
+		
+		/**
+		 * Send
+		 * 	Executes an HTTPService request. The data parameter is required, which will be data for the request
+		 * 		  
+		 * @param data  An raw data object.
+		 * @param cache Optional cache value if set to false it adds a new timestamp to the url request and make sures a new call is sent to the server bypassing cached values on the server.
+		 */
+		public function sendData(data:Object, cache:Boolean=true):void 
+		{
+			// If already transmitting cancel the current request.
+			if(executing){
+				cancel();
+			}
+			
+			// Start the new request.
+			startRequest();
+			
+			var value:String = urlRequest.url; // stash the url
+			/*
+			* 1. Set urlRequest.data to the passed data, 
+			* 2. If parameters is set, then set the urlRequest.data = parameters.
+			* 3. If do not cache then add a timestamp value.
+			* 4. Send(load) the request.
+			* 
+			*/
+			urlRequest.data = data;
+			
+			if(!cache){
+				urlRequest.url += (queryRe.test(urlRequest.url) ? "&" : "?") + "time=" + Math.round(new Date().getTime()).toString();
+			}
+			
+			urlLoader.load(urlRequest);
+			urlRequest.url = value; // restore the url in case cache was set to false.
+		}
+		
+		/**
+		 * Add header
+		 * 
+		 * @param name	The name of the header to append
+		 * @param value The value of the header
+		 */ 
+		public function addHeader(name:String, value:String):void 
+		{
+			var requestHeader:URLRequestHeader = new URLRequestHeader(name, value),
+				oldRequestHeader:URLRequestHeader;
+			var flag:Boolean = false;
+			for(var i:int = 0, l:int = urlRequest.requestHeaders.length; i < l; i++){
+				oldRequestHeader = URLRequestHeader(urlRequest.requestHeaders[i]);
+				if(oldRequestHeader.name == requestHeader.name){
+					// Point to new requestHeader
+					urlRequest[i] = requestHeader;
+					flag = true;
+					break;
+				}
+			}
+			if(!flag){
+				urlRequest.requestHeaders.push(requestHeader);
+			}
+			
+		}
+		
+		/**
+		 * Remove a header
+		 * 
+		 * @param name 	The name of the header to remove
+		 */ 
+		public function removeHeader(name:String):void
+		{
+			var requestHeader:URLRequestHeader;
+			for(var i:int = urlRequest.requestHeaders.length; i--;){
+				requestHeader = URLRequestHeader(urlRequest.requestHeaders[i]);
+				if(requestHeader.name == name){
+					urlRequest.requestHeaders.splice(i, 1);
+					break;
+				}
+			}
+		}
+		
+		/**
+		 * Clear headers
+		 */ 
+		public function clearHeaders():void 
+		{
+			urlRequest.requestHeaders = []; 
 		}
 		
 		/**
@@ -363,7 +467,7 @@ package com.net.http
 			if(timer){
 				timer = null;
 			}
-		
+			
 			timer = new Timer(requestTimeout * 1000, 1); // multiply by 1000 since timer uses miliseconds.
 			timer.addEventListener(TimerEvent.TIMER, handleTimeoutEvent);
 			timer.start();

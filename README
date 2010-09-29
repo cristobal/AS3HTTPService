@@ -1,4 +1,4 @@
-AS3 HTTPService
+AS3 KeyboardManager
 Description:
-	Mimics the mx.rpc.http.HTTPService class for AS3 Applications.
-	By using the flash.net.URLLoader & flash.net.URLRequest classes.
+	An easy to use KeyboardManager for AS3 Projects.
+	This code is part of http://code.google.com/p/doomsdayconsole/
