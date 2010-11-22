@@ -7,15 +7,31 @@ Example:
 	import com.net.http.HTTPService;
 	import com.net.rpc.events.ResultEvent;
 	import com.net.rpc.events.FaultEvent;
+	
+	/**
+	 * Complete handler
+	 */
+	function handleComplete(result:ResultEvent):void {
+	  trace("Successfully loaded xml:");
+	  trace(event.result);
+	}
 
+	/**
+	 * Fault handler
+	 */
+	function handleFault(event:FaultEvent):void {
+	  trace("Could not load xml");
+	  trace(event.fault);
+	}
+	
 	/* Initialize and set parameters*/
 	var url:String = "http://example.com/destination";
 	var httpService:HTTPService = new HTTPService();
 	httpService.resultFormat = HTTPService.RESULT_FORMAT_XML;
 	
 	/* Add Event listeners */
-	// httpService.addEventListener(ResultEvent.RESULT, onComplete);
-	// httpService.addEventListener(FaultEvent.Fault, onFault);
+	httpService.addEventListener(ResultEvent.RESULT, handleComplete);
+	httpService.addEventListener(FaultEvent.Fault, handleFault);
 	
 	/*  Send the request */
 	httpService.send({"key": "value"});
