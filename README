@@ -25,7 +25,7 @@ Example:
 	}
 	
 	/* Initialize and set parameters*/
-	var url:String = "http://example.com/destination";
+	var url:String = 'http://example.com/destination';
 	var httpService:HTTPService = new HTTPService();
 	httpService.resultFormat = HTTPService.RESULT_FORMAT_XML;
 	
