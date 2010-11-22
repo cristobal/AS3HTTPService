@@ -2,3 +2,20 @@ AS3 HTTPService
 Description:
 	Mimics the mx.rpc.http.HTTPService class for AS3 Applications.
 	By using the flash.net.URLLoader & flash.net.URLRequest classes.
+
+Example:
+	import com.net.http.HTTPService;
+	import com.net.rpc.events.ResultEvent;
+	import com.net.rpc.events.FaultEvent;
+
+	/* Initialize and set parameters*/
+	var url:String = "http://example.com/destination";
+	var httpService:HTTPService = new HTTPService();
+	httpService.resultFormat = HTTPService.RESULT_FORMAT_XML;
+	
+	/* Add Event listeners */
+	// httpService.addEventListener(ResultEvent.RESULT, onComplete);
+	// httpService.addEventListener(FaultEvent.Fault, onFault);
+	
+	/*  Send the request */
+	httpService.send({"key": "value"});
