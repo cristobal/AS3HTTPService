@@ -1,5 +1,10 @@
 package	com.net.http
 {
+	import com.net.rpc.Fault;
+	import com.net.rpc.events.FaultEvent;
+	import com.net.rpc.events.InvokeEvent;
+	import com.net.rpc.events.ResultEvent;
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.HTTPStatusEvent;
@@ -17,11 +22,6 @@ package	com.net.http
 	import flash.net.URLVariables;
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
-	
-	import com.net.rpc.Fault;
-	import com.net.rpc.events.FaultEvent;
-	import com.net.rpc.events.InvokeEvent;
-	import com.net.rpc.events.ResultEvent;
 	
 	/**
 	 * HTTPService
@@ -230,7 +230,15 @@ package	com.net.http
 				}
 			}
 			if(!cache){
-				urlRequest.url += (queryRe.test(urlRequest.url) ? "&" : "?") + "time=" + Math.round(new Date().getTime()).toString();
+				var time:String = Math.round(new Date().getTime()).toString();
+				if(method == REQUEST_METHOD_GET){
+					if(!urlRequest.data){
+						urlRequest.data = new URLVariables();
+					}
+					urlRequest.data["time"] = time;
+				} else {
+					urlRequest.url += (queryRe.test(urlRequest.url)  ? "&" : "?") + "time=" + time;	
+				}
 			}
 			
 			urlLoader.load(urlRequest);
@@ -263,9 +271,16 @@ package	com.net.http
 			* 
 			*/
 			urlRequest.data = data;
-			
 			if(!cache){
-				urlRequest.url += (queryRe.test(urlRequest.url) ? "&" : "?") + "time=" + Math.round(new Date().getTime()).toString();
+				var time:String = Math.round(new Date().getTime()).toString();
+				if(method == REQUEST_METHOD_GET){
+					if(!urlRequest.data){
+						urlRequest.data = new URLVariables();
+					}
+					urlRequest.data["time"] = time;
+				} else {
+					urlRequest.url += (queryRe.test(urlRequest.url)  ? "&" : "?") + "time=" + time;	
+				}
 			}
 			
 			urlLoader.load(urlRequest);
@@ -333,20 +348,30 @@ package	com.net.http
 		 */ 
 		public function toCurlString(parameters:Object=null, cache:Boolean=true):String {
 			var urlVariables:URLVariables = new URLVariables();
-			var args:Array = ["curl -d"];
+			var args:Array = ["curl -d"], flag:Boolean = false;
 			if(parameters){
 				for(var property:String in parameters){
 					urlVariables[property] = parameters[property];
+					flag = true;
 				}
-			}
-			var urlQuery:String = urlVariables.toString();
-			if(!(!urlQuery || urlQuery == "")){
-				args.push("\"" + urlQuery + "\"");
 			}
 			
 			var uri:String = urlRequest.url;
 			if(!cache){
-				uri += (queryRe.test(uri) ? "&" : "?") + "time=" + Math.round(new Date().getTime()).toString();
+				var time:String = Math.round(new Date().getTime()).toString();
+				if(method == REQUEST_METHOD_GET){
+					if(!urlVariables){
+						urlVariables = new URLVariables();
+					}
+					urlVariables["time"] = time;
+				} else {
+					uri += ((queryRe.test(uri) || flag) ? "&" : "?") + "time=" + Math.round(new Date().getTime()).toString();
+				}
+			}
+			
+			var urlQuery:String = urlVariables.toString();
+			if(!(!urlQuery || urlQuery == "")){
+				args.push("\"" + urlQuery + "\"");
 			}
 			
 			args.push(uri);
