@@ -26,7 +26,6 @@ package com.net.rpc.events
 		public function InvokeEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
 			super(type, bubbles, cancelable);
-			// TODO: Add more logic here.
 		}
 		
 		/**
@@ -42,7 +41,7 @@ package com.net.rpc.events
 		 */
 		override public function toString():String 
 		{
-			return "InvokeEvent";
+			return '[InvokeEvent type="' + type + '" bubbles=' + bubbles + ' cancelable=' + cancelable + '"]';
 		}
 	}
 }

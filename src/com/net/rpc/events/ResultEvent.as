@@ -10,6 +10,8 @@ package com.net.rpc.events
 {
 	import flash.events.Event;
 	
+	// TODO: Parse http code for result if any.
+	
 	public final class ResultEvent extends Event
 	{
 		// Public Constants 
@@ -29,12 +31,10 @@ package com.net.rpc.events
 		 *  Creates a new ResultEvent
 		 * 	  The event that indicates an RPC operation has successfully returned a result.
 		 */ 
-		public function ResultEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false, result:Object = null)
+		public function ResultEvent(type:String, bubbles:Boolean = false, cancelable:Boolean = false, result:Object = null)
 		{
 			super(type, bubbles, cancelable);
 			this._result = result;
-			// TODO: Parse http code for result if any.
-			// TODO: Add more logic here.
 		}
 		
 		/**
@@ -58,7 +58,7 @@ package com.net.rpc.events
 		 */
 		override public function toString():String 
 		{
-			return "ResultEvent";
+			return '[ResultEvent type="' + type + '" bubbles=' + bubbles + ' cancelable=' + cancelable + '"]';
 		}
 	}
 }
