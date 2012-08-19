@@ -553,7 +553,7 @@ package	com.net.http
 		{
 			var urlVariables:URLVariables = new URLVariables();
 			var args:Array = ["curl -d"], flag:Boolean = false;
-			if(parameters){
+			if (parameters) {
 				for(var property:String in parameters){
 					urlVariables[property] = parameters[property];
 					flag = true;
@@ -561,7 +561,7 @@ package	com.net.http
 			}
 			
 			var uri:String = urlRequest.url;
-			if(!cache){
+			if (!cache) {
 				var time:String = getTime();
 				if (method == REQUEST_METHOD_GET) {
 					if (!urlVariables) {
@@ -575,7 +575,7 @@ package	com.net.http
 			}
 			
 			var urlQuery:String = urlVariables.toString();
-			if(!(!urlQuery || urlQuery == "")){
+			if (!(!urlQuery || urlQuery == "")) {
 				args.push("\"" + urlQuery + "\"");
 			}
 			
